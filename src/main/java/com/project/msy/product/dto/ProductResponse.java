@@ -25,4 +25,5 @@ public class ProductResponse {
     private String originName;          // ← 추가
     private LocalDateTime createdAt;
     private List<SpecificationDto> specifications;
+    private List<String> features;
 }

@@ -4,8 +4,14 @@ import com.project.msy.product.dto.CreateProductRequest;
 import com.project.msy.product.dto.ProductResponse;
 import com.project.msy.product.dto.SpecificationDto;
 import com.project.msy.product.dto.UpdateProductRequest;
-import com.project.msy.product.entity.*;
-import com.project.msy.product.repository.*;
+import com.project.msy.product.entity.Product;
+import com.project.msy.product.entity.ProductCategory;
+import com.project.msy.product.entity.ProductFeature;
+import com.project.msy.product.entity.ProductOrigin;
+import com.project.msy.product.entity.ProductSpecification;
+import com.project.msy.product.repository.ProductCategoryRepository;
+import com.project.msy.product.repository.ProductOriginRepository;
+import com.project.msy.product.repository.ProductRepository;
 import com.project.msy.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,9 +33,11 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public ProductResponse createProduct(CreateProductRequest request) {
         ProductCategory category = categoryRepository.findById(request.getCategory())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid category id"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "유효하지 않은 카테고리: " + request.getCategory()));
         ProductOrigin origin = originRepository.findById(request.getOrigin())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid origin id"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "유효하지 않은 원산지: " + request.getOrigin()));
 
         Product product = Product.builder()
                 .name(request.getName())
@@ -43,6 +51,7 @@ public class ProductServiceImpl implements ProductService {
                 .origin(origin)
                 .build();
 
+        // 사양 저장
         if (request.getSpecifications() != null) {
             request.getSpecifications().forEach(dto -> {
                 ProductSpecification spec = ProductSpecification.builder()
@@ -54,30 +63,103 @@ public class ProductServiceImpl implements ProductService {
             });
         }
 
-        var saved = productRepository.save(product);
-        return ProductResponse.builder()
-                .id(saved.getId())
-                .name(saved.getName())
-                .category(saved.getCategory().getId())
-                .price(saved.getPrice())
-                .discountPrice(saved.getDiscountPrice())
-                .stockQuantity(saved.getStockQuantity())
-                .description(saved.getDescription())
-                .shippingFee(saved.getShippingFee())
-                .manufacturer(saved.getManufacturer())
-                .origin(saved.getOrigin().getId())
-                .createdAt(saved.getCreatedAt())
-                .specifications(saved.getSpecifications().stream()
-                        .map(s -> new SpecificationDto(s.getSpecName(), s.getSpecValue()))
-                        .collect(Collectors.toList()))
-                .build();
+        // 상품 특징 저장
+        if (request.getFeatures() != null) {
+            request.getFeatures().forEach(name -> {
+                ProductFeature feature = ProductFeature.builder()
+                        .product(product)
+                        .feature(name)
+                        .build();
+                product.getFeatures().add(feature);
+            });
+        }
+
+        Product saved = productRepository.save(product);
+        return buildResponse(saved);
     }
 
-    // src/main/java/com/project/msy/product/service/impl/ProductServiceImpl.java
     @Override
     @Transactional(readOnly = true)
     public List<ProductResponse> getAllProducts() {
-        return productRepository.findAll().stream().map(p -> ProductResponse.builder()
+        return productRepository.findAll().stream()
+                .map(this::buildResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ProductResponse getProductById(Long productId) {
+        Product p = productRepository.findById(productId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다: " + productId));
+        return buildResponse(p);
+    }
+
+    @Override
+    @Transactional
+    public ProductResponse updateProduct(Long productId, UpdateProductRequest request) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다: " + productId));
+
+        ProductCategory category = categoryRepository.findById(request.getCategory())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "유효하지 않은 카테고리: " + request.getCategory()));
+        ProductOrigin origin = originRepository.findById(request.getOrigin())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "유효하지 않은 원산지: " + request.getOrigin()));
+
+        // 기본 필드 업데이트
+        product.setName(request.getName());
+        product.setCategory(category);
+        product.setPrice(request.getPrice());
+        product.setDiscountPrice(request.getDiscountPrice());
+        product.setStockQuantity(request.getStock());
+        product.setDescription(request.getDescription());
+        product.setShippingFee(request.getShippingFee());
+        product.setManufacturer(request.getManufacturer());
+        product.setOrigin(origin);
+
+        // 사양 업데이트
+        product.getSpecifications().clear();
+        if (request.getSpecifications() != null) {
+            request.getSpecifications().forEach(dto -> {
+                ProductSpecification spec = ProductSpecification.builder()
+                        .product(product)
+                        .specName(dto.getLabel())
+                        .specValue(dto.getValue())
+                        .build();
+                product.getSpecifications().add(spec);
+            });
+        }
+
+        // 상품 특징 업데이트
+        product.getFeatures().clear();
+        if (request.getFeatures() != null) {
+            request.getFeatures().forEach(name -> {
+                ProductFeature feature = ProductFeature.builder()
+                        .product(product)
+                        .feature(name)
+                        .build();
+                product.getFeatures().add(feature);
+            });
+        }
+
+        Product updated = productRepository.save(product);
+        return buildResponse(updated);
+    }
+
+    @Override
+    @Transactional
+    public void deleteProduct(Long productId) {
+        if (!productRepository.existsById(productId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다: " + productId);
+        }
+        productRepository.deleteById(productId);
+    }
+
+    private ProductResponse buildResponse(Product p) {
+        return ProductResponse.builder()
                 .id(p.getId())
                 .name(p.getName())
                 .category(p.getCategory().getId())
@@ -93,75 +175,10 @@ public class ProductServiceImpl implements ProductService {
                 .createdAt(p.getCreatedAt())
                 .specifications(p.getSpecifications().stream()
                         .map(s -> new SpecificationDto(s.getSpecName(), s.getSpecValue()))
-                        .toList()
-                )
-                .build()
-        ).toList();
-    }
-
-    @Override
-    @Transactional
-    public ProductResponse updateProduct(Long productId, UpdateProductRequest request) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다: " + productId));
-
-        ProductCategory category = categoryRepository.findById(request.getCategory())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "유효하지 않은 카테고리: " + request.getCategory()));
-        ProductOrigin origin = originRepository.findById(request.getOrigin())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "유효하지 않은 원산지: " + request.getOrigin()));
-
-        // 필드 업데이트
-        product.setName(request.getName());
-        product.setCategory(category);
-        product.setPrice(request.getPrice());
-        product.setDiscountPrice(request.getDiscountPrice());
-        product.setStockQuantity(request.getStock());
-        product.setDescription(request.getDescription());
-        product.setShippingFee(request.getShippingFee());
-        product.setManufacturer(request.getManufacturer());
-        product.setOrigin(origin);
-
-        // 사양 업데이트: 기존 모두 제거 후 재추가
-        product.getSpecifications().clear();
-        if (request.getSpecifications() != null) {
-            request.getSpecifications().forEach(dto -> {
-                ProductSpecification spec = ProductSpecification.builder()
-                        .product(product)
-                        .specName(dto.getLabel())
-                        .specValue(dto.getValue())
-                        .build();
-                product.getSpecifications().add(spec);
-            });
-        }
-
-        Product updated = productRepository.save(product);
-        return ProductResponse.builder()
-                .id(updated.getId())
-                .name(updated.getName())
-                .category(updated.getCategory().getId())
-                .categoryName(updated.getCategory().getName())
-                .price(updated.getPrice())
-                .discountPrice(updated.getDiscountPrice())
-                .stockQuantity(updated.getStockQuantity())
-                .description(updated.getDescription())
-                .shippingFee(updated.getShippingFee())
-                .manufacturer(updated.getManufacturer())
-                .origin(updated.getOrigin().getId())
-                .originName(updated.getOrigin().getName())
-                .createdAt(updated.getCreatedAt())
-                .specifications(updated.getSpecifications().stream()
-                        .map(s -> new SpecificationDto(s.getSpecName(), s.getSpecValue()))
+                        .collect(Collectors.toList()))
+                .features(p.getFeatures().stream()
+                        .map(ProductFeature::getFeature)
                         .collect(Collectors.toList()))
                 .build();
     }
-
-    @Override
-    @Transactional
-    public void deleteProduct(Long productId) {
-        if (!productRepository.existsById(productId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다: " + productId);
-        }
-        productRepository.deleteById(productId);
-    }
-
 }

@@ -35,4 +35,7 @@ public class CreateProductRequest {
     private Long origin;
 
     private List<SpecificationDto> specifications;
+
+    private List<String> features;
+
 }

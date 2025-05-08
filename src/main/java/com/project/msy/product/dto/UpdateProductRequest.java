@@ -33,4 +33,7 @@ public class UpdateProductRequest {
     private Long origin;
 
     private List<SpecificationDto> specifications;
+
+    private List<String> features;
+
 }
