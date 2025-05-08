@@ -22,10 +22,10 @@ public class User {
     @Column(unique = true, nullable = true)
     private String userId;
 
-    @Column(nullable = true) // ✅ 소셜 로그인 대응 위해 nullable 처리
+    @Column(nullable = true) // 소셜 로그인 대응 위해 nullable 처리
     private String name;
 
-    @Column(nullable = true) // ✅ 소셜 로그인 시 null 가능
+    @Column(nullable = true) // 소셜 로그인 시 null 가능
     private String password;
 
     @Column(unique = true, nullable = true)
@@ -44,7 +44,7 @@ public class User {
     private Role role;
 
     @Enumerated(EnumType.STRING)
-    private Provider provider; // ✅ 소셜 로그인 제공자 (구글 or 카카오)
+    private Provider provider; // 소셜 로그인 제공자 (구글 or 카카오)
 
     @Column(unique = true, nullable = true)
     private String oauthId;
