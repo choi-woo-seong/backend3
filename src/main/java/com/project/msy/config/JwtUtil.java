@@ -54,4 +54,29 @@ public class JwtUtil {
                 .getBody()
                 .get("role", String.class);
     }
+
+    // 이메일 인증 기능
+    public String generateEmailVerificationToken(String email, String code, long durationMillis) {
+        // 이메일 인증용 JWT 생성: email, code 정보를 담고 5분 등 제한시간 설정
+        return Jwts.builder()
+                .setSubject("EMAIL_VERIFICATION") // 용도 구분용 subject
+                .claim("email", email)
+                .claim("code", code)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + durationMillis))
+                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public Claims parseClaims(String token) {
+        // JWT를 파싱해서 payload(claims) 추출
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey.getBytes())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
 }
+
+
