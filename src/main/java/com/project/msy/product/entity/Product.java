@@ -1,11 +1,13 @@
 package com.project.msy.product.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 상품 Entity
@@ -69,5 +71,12 @@ public class Product {
     @PrePersist
     public void onCreate() {
         this.createdAt = LocalDateTime.now();
+    }
+
+    @JsonProperty("imageUrls")
+    public List<String> getImageUrls() {
+        return images.stream()
+                .map(ProductImage::getImageUrl)
+                .collect(Collectors.toList());
     }
 }
