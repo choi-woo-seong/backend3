@@ -48,22 +48,26 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider())
                 // 경로별 권한 설정
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/origins/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
-                        // 상품 등록은 인증 필요
-                        .requestMatchers(HttpMethod.POST, "/api/products/**").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/api/products/**").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/api/products/**").authenticated()
-                        // 나머지 API는 인증 필요
-                        .requestMatchers("/api/**").authenticated()
-                        // 어드민 페이지는 ADMIN 권한 필요
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
-                        // 그 외 Static 리소스 및 SPA 라우팅은 모두 허용
-                        .anyRequest().permitAll()
+//                        어드민 상품 create,read 임시 승인 설정 추후에 변경해야함
+                                .requestMatchers("/api/facility/**").permitAll()
+                                .requestMatchers("/api/facility").permitAll()
+
+                                .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/auth/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/origins/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+                                // 상품 등록은 인증 필요
+                                .requestMatchers(HttpMethod.POST, "/api/products/**").authenticated()
+                                .requestMatchers(HttpMethod.PUT, "/api/products/**").authenticated()
+                                .requestMatchers(HttpMethod.DELETE, "/api/products/**").authenticated()
+                                // 나머지 API는 인증 필요
+                                .requestMatchers("/api/**").authenticated()
+                                // 어드민 페이지는 ADMIN 권한 필요
+                                .requestMatchers("/admin/**").hasRole("ADMIN")
+                                .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
+                                // 그 외 Static 리소스 및 SPA 라우팅은 모두 허용
+                                .anyRequest().permitAll()
                 )
                 // OAuth2 로그인 설정
                 .oauth2Login(oauth -> oauth
