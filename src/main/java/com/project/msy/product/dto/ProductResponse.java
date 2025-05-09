@@ -26,4 +26,5 @@ public class ProductResponse {
     private LocalDateTime createdAt;
     private List<SpecificationDto> specifications;
     private List<String> features;
+    private List<String> images;
 }

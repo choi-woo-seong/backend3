@@ -15,4 +15,5 @@ public interface ProductService {
 
     ProductResponse updateProduct(Long productId, UpdateProductRequest request);
     void deleteProduct(Long productId);// ← 추가
+    void addImage(Long productId, String imageUrl);
 }

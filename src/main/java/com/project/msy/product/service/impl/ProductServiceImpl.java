@@ -4,15 +4,13 @@ import com.project.msy.product.dto.CreateProductRequest;
 import com.project.msy.product.dto.ProductResponse;
 import com.project.msy.product.dto.SpecificationDto;
 import com.project.msy.product.dto.UpdateProductRequest;
-import com.project.msy.product.entity.Product;
-import com.project.msy.product.entity.ProductCategory;
-import com.project.msy.product.entity.ProductFeature;
-import com.project.msy.product.entity.ProductOrigin;
-import com.project.msy.product.entity.ProductSpecification;
+import com.project.msy.product.entity.*;
 import com.project.msy.product.repository.ProductCategoryRepository;
+import com.project.msy.product.repository.ProductImageRepository;
 import com.project.msy.product.repository.ProductOriginRepository;
 import com.project.msy.product.repository.ProductRepository;
 import com.project.msy.product.service.ProductService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -26,6 +24,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
+    private final ProductImageRepository productImageRepository;
     private final ProductCategoryRepository categoryRepository;
     private final ProductOriginRepository originRepository;
 
@@ -179,6 +178,27 @@ public class ProductServiceImpl implements ProductService {
                 .features(p.getFeatures().stream()
                         .map(ProductFeature::getFeature)
                         .collect(Collectors.toList()))
+                .images(
+                        p.getImages().stream()
+                                .map(ProductImage::getImageUrl)
+                                .collect(Collectors.toList())
+                )
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public void addImage(Long productId, String imageUrl) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 상품 id=" + productId));
+
+        ProductImage img = ProductImage.builder()
+                .product(product)
+                .imageUrl(imageUrl)
+                .isMain(false)  // 필요에 따라 true/false 설정
+                .build();
+
+        product.getImages().add(img);
+        productImageRepository.save(img);
     }
 }
