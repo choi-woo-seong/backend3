@@ -47,6 +47,21 @@ public class FacilityController {
         return ResponseEntity.ok(dto);
     }
 
+    //    태그별 list조회
+    @GetMapping("/facility/search")
+    public ResponseEntity<List<FacilityResponseDTO>> searchFacilities(
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String grade,
+            @RequestParam(required = false) String facilitySize,
+            @RequestParam(required = false) String sort,
+            @RequestParam(required = false) String region // 🔥 추가
+    ) {
+        List<FacilityResponseDTO> result = facilityService.searchFacilities(type, grade, facilitySize, sort, region);
+        return ResponseEntity.ok(result);
+    }
+
+
+
     // UPDATE
     @PutMapping(value = "/facility/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<FacilityResponseDTO> updateFacility(
