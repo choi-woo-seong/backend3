@@ -8,8 +8,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class NoticeServiceImpl implements NoticeService {
@@ -21,8 +19,8 @@ public class NoticeServiceImpl implements NoticeService {
         Notice notice = Notice.builder()
                 .title(dto.getTitle())
                 .content(dto.getContent())
-                .isVisible(dto.isVisible())       // 게시 여부
-                .views(0)                          // ✅ 조회수 0으로 시작
+                .isVisible(dto.isVisible())
+                .views(0)
                 .build();
 
         Notice saved = noticeRepository.save(notice);
@@ -39,10 +37,6 @@ public class NoticeServiceImpl implements NoticeService {
     public NoticeDto getNoticeById(Long id) {
         Notice notice = noticeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("해당 공지사항을 찾을 수 없습니다."));
-
-        notice.setViews(notice.getViews() + 1);       // ✅ 조회수 증가
-        noticeRepository.save(notice);                // ✅ 반영 저장
-
         return toDto(notice);
     }
 
@@ -51,14 +45,22 @@ public class NoticeServiceImpl implements NoticeService {
         noticeRepository.deleteById(id);
     }
 
+    // ✅ 조회수만 증가
+    @Override
+    public void increaseViewCount(Long id) {
+        Notice notice = noticeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("해당 공지사항을 찾을 수 없습니다."));
+        notice.setViews(notice.getViews() + 1);
+        noticeRepository.save(notice);
+    }
 
     private NoticeDto toDto(Notice entity) {
         return NoticeDto.builder()
                 .id(entity.getId())
                 .title(entity.getTitle())
                 .content(entity.getContent())
-                .isVisible(entity.isVisible())         // 게시 여부
-                .views(entity.getViews())              // ✅ 조회수 포함
+                .isVisible(entity.isVisible())
+                .views(entity.getViews())
                 .createdAt(entity.getCreatedAt())
                 .build();
     }
