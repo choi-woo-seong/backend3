@@ -36,13 +36,17 @@ public class NoticeController {
         return ResponseEntity.ok(notice);
     }
 
+    // ✅ 조회수 증가 엔드포인트 추가
+    @PatchMapping("/{id}/view")
+    public ResponseEntity<Void> increaseViewCount(@PathVariable Long id) {
+        noticeService.increaseViewCount(id);
+        return ResponseEntity.ok().build();
+    }
+
     // 공지사항 삭제
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteNotice(@PathVariable Long id) {
         noticeService.deleteNotice(id);
         return ResponseEntity.noContent().build();
     }
-
-
-
 }
