@@ -39,4 +39,31 @@ public class FacilityController {
             return ResponseEntity.ok(facilityService.getAllFacilities());
         }
     }
+
+    //    admin facility 한개만 read
+    @GetMapping("/facility/{id}")
+    public ResponseEntity<FacilityResponseDTO> getFacility(@PathVariable Long id) {
+        FacilityResponseDTO dto = facilityService.getFacilityById(id);
+        return ResponseEntity.ok(dto);
+    }
+
+    // UPDATE
+    @PutMapping(value = "/facility/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<FacilityResponseDTO> updateFacility(
+            @PathVariable Long id,
+            @RequestPart("dto") FacilityCreateRequestDTO dto,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images
+    ) throws IOException {
+        FacilityResponseDTO updated = facilityService.updateFacility(id, dto, images);
+        return ResponseEntity.ok(updated);
+    }
+
+    // DELETE
+    @DeleteMapping("/facility/{id}")
+    public ResponseEntity<Void> deleteFacility(@PathVariable Long id) {
+        facilityService.deleteFacility(id);
+        return ResponseEntity.noContent().build();
+    }
+
+
 }

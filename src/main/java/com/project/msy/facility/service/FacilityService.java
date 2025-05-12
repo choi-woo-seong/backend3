@@ -77,11 +77,88 @@ public class FacilityService {
 
     private FacilityResponseDTO convertToDTO(Facility facility) {
         return FacilityResponseDTO.builder()
+                .id(facility.getId())
                 .name(facility.getName())
                 .type(facility.getType())
+                .establishedYear(facility.getEstablishedYear())
                 .address(facility.getAddress())
+                .phone(facility.getPhone())
+                .homepage(facility.getHomepage())
+                .grade(facility.getGrade())
+                .description(facility.getDescription())
+                .weekdayHours(facility.getWeekdayHours())
+                .weekendHours(facility.getWeekendHours())
+                .holidayHours(facility.getHolidayHours())
+                .visitingHours(facility.getVisitingHours())
+                .facilitySize(facility.getFacilitySize())
                 .createdAt(facility.getCreatedAt())
                 .build();
     }
+
+    //    한개만 읽기
+    @Transactional(readOnly = true)
+    public FacilityResponseDTO getFacilityById(Long id) {
+        Facility facility = facilityRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 시설이 존재하지 않습니다. id=" + id));
+        return convertToDTO(facility);
+    }
+
+    // UPDATE
+    @Transactional
+    public FacilityResponseDTO updateFacility(Long id, FacilityCreateRequestDTO dto, List<MultipartFile> imageFiles) throws IOException {
+        Facility facility = facilityRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 시설이 존재하지 않습니다. id=" + id));
+
+        // 기존 필드 업데이트
+        facility.setType(dto.getType());
+        facility.setName(dto.getName());
+        facility.setEstablishedYear(dto.getEstablishedYear());
+        facility.setAddress(dto.getAddress());
+        facility.setPhone(dto.getPhone());
+        facility.setHomepage(dto.getHomepage());
+        facility.setGrade(dto.getGrade());
+        facility.setDescription(dto.getDescription());
+        facility.setWeekdayHours(dto.getWeekdayHours());
+        facility.setWeekendHours(dto.getWeekendHours());
+        facility.setHolidayHours(dto.getHolidayHours());
+        facility.setVisitingHours(dto.getVisitingHours());
+        facility.setFacilitySize(dto.getFacilitySize());
+
+        // 기존 이미지 전부 삭제
+        facilityImageRepository.deleteAll(facility.getFacilityImages());
+        facility.getFacilityImages().clear();
+
+        // 새 이미지 저장
+        if (imageFiles != null && !imageFiles.isEmpty()) {
+            List<FacilityImage> images = imageFiles.stream()
+                    .map(file -> {
+                        try {
+                            String url = s3Uploader.upload(file, "facilities");
+                            return FacilityImage.builder()
+                                    .facility(facility)
+                                    .imageUrl(url)
+                                    .build();
+                        } catch (IOException e) {
+                            throw new RuntimeException("S3 업로드 실패", e);
+                        }
+                    })
+                    .collect(Collectors.toList());
+
+            facility.getFacilityImages().addAll(images);
+            facilityImageRepository.saveAll(images);
+        }
+
+        return convertToDTO(facility);
+    }
+
+    // DELETE
+    @Transactional
+    public void deleteFacility(Long id) {
+        Facility facility = facilityRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 시설이 존재하지 않습니다. id=" + id));
+
+        facilityRepository.delete(facility);
+    }
+
 
 }

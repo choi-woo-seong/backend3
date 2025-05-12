@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 @Service("customUserDetailsFromSecurity")
 @Primary
 @RequiredArgsConstructor
-@Primary
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
