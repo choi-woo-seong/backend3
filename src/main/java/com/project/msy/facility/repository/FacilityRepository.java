@@ -1,5 +1,6 @@
 package com.project.msy.facility.repository;
 
+import com.project.msy.admin.dashboard.dto.FacilityTypeDto;
 import com.project.msy.facility.entity.Facility;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -20,5 +21,9 @@ public interface FacilityRepository extends JpaRepository<Facility, Long> {
                                     @Param("grade") String grade);
 //    지역 세부 설정을 하기위한  jpa
 public List<Facility> findByAddressContainingIgnoreCase(String region);
+
+    @Query("SELECT new com.project.msy.admin.dashboard.dto.FacilityTypeDto(f.type, COUNT(f)) " +
+            "FROM Facility f GROUP BY f.type")
+    List<FacilityTypeDto> countByType();
 
 }

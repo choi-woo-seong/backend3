@@ -63,6 +63,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.DELETE, "/api/notices/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/reviews/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/admin/**").permitAll()
 
                                 // 상품 등록은 인증 필요
                                 .requestMatchers(HttpMethod.POST, "/api/products/**").authenticated()
