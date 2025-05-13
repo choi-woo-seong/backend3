@@ -19,6 +19,10 @@ public class StatsServiceImpl implements StatsService {
     @Override
     @Transactional
     public void recordSale(Long productId, int quantity) {
+
+        System.out.println("[DEBUG] recordSale 호출 → productId="
+                + productId + ", qty=" + quantity);
+
         LocalDate today = LocalDate.now();
         // 키 구성
         Stats.StatsType type       = Stats.StatsType.SALE;
