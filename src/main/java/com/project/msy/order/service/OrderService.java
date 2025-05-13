@@ -1,6 +1,10 @@
 package com.project.msy.order.service;
 
+import com.project.msy.order.dto.OrderSummaryDto;
 import com.project.msy.payment.kakao.dto.KakaoPayApproveResponse;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 public interface OrderService {
     /**
@@ -14,4 +18,10 @@ public interface OrderService {
             int totalAmount,
             KakaoPayApproveResponse approveResponse
     );
+
+    BigDecimal getTotalSales();
+
+    Long getOrderCount();
+
+    List<OrderSummaryDto> getOrderSummaries();
 }

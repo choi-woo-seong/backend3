@@ -1,5 +1,6 @@
 package com.project.msy.order.service.impl;
 
+import com.project.msy.order.dto.OrderSummaryDto;
 import com.project.msy.order.entity.Order;
 import com.project.msy.order.repository.OrderRepository;
 import com.project.msy.order.service.OrderService;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -50,4 +52,20 @@ public class OrderServiceImpl implements OrderService {
 
         return orderRepository.save(order).getId();
     }
+    @Override
+    public BigDecimal getTotalSales() {
+        return orderRepository.findTotalSales() != null ? orderRepository.findTotalSales() : BigDecimal.ZERO;
+    }
+
+    @Override
+    public Long getOrderCount() {
+        return orderRepository.countOrders();
+    }
+
+    @Override
+    public List<OrderSummaryDto> getOrderSummaries() {
+        return orderRepository.findOrderSummaries();
+    }
+
+
 }
