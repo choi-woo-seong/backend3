@@ -1,5 +1,7 @@
 package com.project.msy.qna.service;
 
+import com.project.msy.product.entity.Product;
+import com.project.msy.product.repository.ProductRepository;
 import com.project.msy.qna.dto.AnswerResponse;
 import com.project.msy.qna.dto.QuestionResponse;
 import com.project.msy.qna.dto.QuestionRequest;
@@ -15,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,15 +25,21 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional
 public class QnaServiceImpl implements QnaService {
+
     private final QuestionRepository questionRepo;
     private final AnswerRepository answerRepo;
     private final UserRepository userRepo;
+    private final ProductRepository productRepo; // ✅ productRepo 주입
 
     @Override
     public QuestionResponse createQuestion(Long userId, QuestionRequest dto) {
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
-        Question q = new Question(dto.getTitle(), dto.getContent(), user);
+
+        Product product = productRepo.findById(dto.getProductId())
+                .orElseThrow(() -> new EntityNotFoundException("상품을 찾을 수 없습니다."));
+
+        Question q = new Question(dto.getTitle(), dto.getContent(), user, product); // ✅ product 설정
         questionRepo.save(q);
         return new QuestionResponse(q);
     }
@@ -129,8 +138,6 @@ public class QnaServiceImpl implements QnaService {
     public void deleteQuestionByAdmin(Long id) {
         Question question = questionRepo.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("질문을 찾을 수 없습니다."));
-
         questionRepo.delete(question);
     }
-
 }

@@ -1,5 +1,6 @@
 package com.project.msy.qna.entity;
 
+import com.project.msy.product.entity.Product;
 import com.project.msy.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -28,6 +29,11 @@ public class Question {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    // ✅ 여기 추가됨: 질문과 상품은 다대일 관계
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
+
     @OneToOne(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     private Answer answer;
 
@@ -37,10 +43,11 @@ public class Question {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt = LocalDateTime.now();
 
-    public Question(String title, String content, User user) {
+    public Question(String title, String content, User user, Product product) {
         this.title = title;
         this.content = content;
         this.user = user;
+        this.product = product; // ✅ 생성자에서도 초기화 가능
     }
 
     @PreUpdate
@@ -48,4 +55,3 @@ public class Question {
         this.updatedAt = LocalDateTime.now();
     }
 }
-
