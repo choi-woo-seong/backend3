@@ -96,7 +96,7 @@ public class FacilityService {
             }
         } else {
             facilities = facilityRepository.findAll();
-        }
+    git     }
 
 
         // 정렬 등 추가 필터링 여기서 적용
