@@ -1,5 +1,6 @@
 package com.project.msy.user.service;
 
+import com.project.msy.admin.dashboard.dto.UserDailySignupDto;
 import com.project.msy.auth.dto.LoginRequest;
 import com.project.msy.auth.dto.LoginResponse;
 import com.project.msy.auth.dto.RegisterRequest;
@@ -68,5 +69,8 @@ public class UserService {
                 .build();
 
         userRepository.save(user);
+    }
+    public List<UserDailySignupDto> getDailyUserGrowth() {
+        return userRepository.findDailySignupsForLast30Days();
     }
 }
