@@ -96,7 +96,7 @@ public class FacilityService {
             }
         } else {
             facilities = facilityRepository.findAll();
-    git     }
+       }
 
 
         // 정렬 등 추가 필터링 여기서 적용
@@ -152,6 +152,8 @@ public class FacilityService {
                 .visitingHours(facility.getVisitingHours())
                 .facilitySize(facility.getFacilitySize())
                 .createdAt(facility.getCreatedAt())
+                .viewCount(facility.getViewCount())
+                .likeCount(facility.getLikeCount())
                 .imageUrls(imageUrls)
                 .build();
     }
@@ -220,6 +222,17 @@ public class FacilityService {
 
         facilityRepository.delete(facility);
     }
+
+//    viewCount +1
+@Transactional
+public void increaseViewCount(Long id) {
+    Facility facility = facilityRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("해당 시설이 존재하지 않습니다. id=" + id));
+
+    facility.setViewCount(facility.getViewCount() + 1);
+    facilityRepository.save(facility);
+}
+
 
 
 }

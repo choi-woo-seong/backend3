@@ -5,6 +5,7 @@ import com.project.msy.facility.dto.FacilityResponseDTO;
 import com.project.msy.facility.entity.Facility;
 import com.project.msy.facility.service.FacilityService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
@@ -61,7 +62,6 @@ public class FacilityController {
     }
 
 
-
     // UPDATE
     @PutMapping(value = "/facility/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<FacilityResponseDTO> updateFacility(
@@ -80,5 +80,12 @@ public class FacilityController {
         return ResponseEntity.noContent().build();
     }
 
+    //    viewCount +1 하기
+    @PostMapping("/facility/{id}/view")
+    public ResponseEntity<Void> increaseViewCount(@PathVariable Long id) {
+        log.info("🔥 viewCount 올라갑니다 id: {}", id);
+        facilityService.increaseViewCount(id);
+        return ResponseEntity.ok().build();
+    }
 
 }

@@ -27,4 +27,6 @@ public class FacilityResponseDTO {
     private String facilitySize;
     private List<String> imageUrls;
     private LocalDateTime createdAt;
+    private Integer viewCount;
+    private Integer likeCount;
 }

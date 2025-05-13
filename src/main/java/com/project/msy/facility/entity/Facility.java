@@ -78,6 +78,8 @@ public class Facility {
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+        if (this.viewCount == null) this.viewCount = 0;
+        if (this.likeCount == null) this.likeCount = 0;
     }
 
     @OneToMany(mappedBy = "facility", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
