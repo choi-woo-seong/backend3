@@ -1,5 +1,6 @@
 package com.project.msy.facility.entity;
 
+import com.project.msy.bookmark.entity.Bookmark;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -84,6 +85,9 @@ public class Facility {
 
     @OneToMany(mappedBy = "facility", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<FacilityImage> facilityImages = new ArrayList<>();
+
+    @OneToMany(mappedBy = "facility", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Bookmark> bookmarks = new ArrayList<>();
 
 
 }
