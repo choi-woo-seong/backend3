@@ -1,6 +1,7 @@
 package com.project.msy.user.entity;
 
 import com.project.msy.bookmark.entity.Bookmark;
+import com.project.msy.qna.entity.Question;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -49,4 +50,7 @@ public class User {
 
     @Column(unique = true, nullable = true)
     private String oauthId;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Question> questions = new ArrayList<>();
 }
