@@ -22,11 +22,8 @@ public class AdminUserController {
     /** 전체 회원 조회 */
     @GetMapping
     public ResponseEntity<List<UserSummaryDto>> getAllUsers() {
-        List<User> users = userService.findAllUsers();
-        List<UserSummaryDto> result = users.stream()
-                .map(UserSummaryDto::new)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(result);
+        List<UserSummaryDto> users = userService.findAllUsers();
+        return ResponseEntity.ok(users);
     }
 
     /** 특정 회원 조회 */

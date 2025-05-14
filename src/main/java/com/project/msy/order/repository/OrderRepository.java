@@ -9,12 +9,14 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
+    // 판매 현황용
     @Query("""
     SELECT new com.project.msy.order.dto.OrderSummaryDto(
         o.id, u.name, p.name, o.quantity, o.totalPrice, o.orderDate
@@ -23,7 +25,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     JOIN o.user u
     JOIN o.product p
     ORDER BY o.orderDate DESC
-""")
+    """)
     List<OrderSummaryDto> findOrderSummaries();
 
     @Query("SELECT SUM(o.totalPrice) FROM Order o")
@@ -32,22 +34,20 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT COUNT(o) FROM Order o")
     Long countOrders();
 
+    // 관리자 대시보드 통계용
+    long countByOrderDateBetween(LocalDateTime start, LocalDateTime end);
 
     @Query(value = """
-    SELECT
-        SUM(total_price) AS total,
-        SUM(CASE WHEN DATE(order_date) = CURDATE() THEN total_price ELSE 0 END) AS today,
-        SUM(CASE WHEN DATE(order_date) = CURDATE() - INTERVAL 1 DAY THEN total_price ELSE 0 END) AS yesterday
-    FROM orders
-""", nativeQuery = true)
+        SELECT
+            SUM(total_price) AS total,
+            SUM(CASE WHEN DATE(order_date) = CURDATE() THEN total_price ELSE 0 END) AS today,
+            SUM(CASE WHEN DATE(order_date) = CURDATE() - INTERVAL 1 DAY THEN total_price ELSE 0 END) AS yesterday
+        FROM orders
+    """, nativeQuery = true)
     Map<String, Object> getSalesSummary();
 
     /**
      * 최근 7일(오늘 포함) 일별 매출 조회
-     * - o.createdAt 컬럼을 DATE() 내장함수로 잘라서 그룹핑
-     */
-    /**
-     * 최근 7일(오늘 포함) 일별 매출 조회 (네이티브 SQL)
      */
     @Query(value = """
       SELECT 
