@@ -4,11 +4,13 @@ import com.project.msy.order.dto.OrderSummaryDto;
 import com.project.msy.order.entity.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-<<<<<<< HEAD
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
@@ -29,14 +31,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("SELECT COUNT(o) FROM Order o")
     Long countOrders();
-=======
-import java.time.LocalDateTime;
-import java.util.Map;
 
-@Repository
-public interface OrderRepository extends JpaRepository<Order, Long> {
-    long count();
-    long countByOrderDateBetween(LocalDateTime start, LocalDateTime end);
+
     @Query(value = """
     SELECT
         SUM(total_price) AS total,
@@ -45,5 +41,22 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     FROM orders
 """, nativeQuery = true)
     Map<String, Object> getSalesSummary();
->>>>>>> feature/woo6
+
+    /**
+     * 최근 7일(오늘 포함) 일별 매출 조회
+     * - o.createdAt 컬럼을 DATE() 내장함수로 잘라서 그룹핑
+     */
+    /**
+     * 최근 7일(오늘 포함) 일별 매출 조회 (네이티브 SQL)
+     */
+    @Query(value = """
+      SELECT 
+        DATE(o.order_date)   AS sale_date, 
+        COALESCE(SUM(o.total_price), 0) AS amount
+      FROM orders o
+      WHERE o.order_date >= :startDate
+      GROUP BY sale_date
+      ORDER BY sale_date
+    """, nativeQuery = true)
+    List<Object[]> findDailyRevenueSince(@Param("startDate") LocalDate startDate);
 }

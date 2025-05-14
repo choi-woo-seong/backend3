@@ -8,6 +8,7 @@ import com.project.msy.stats.repository.StatsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.project.msy.dashboard.dto.DailySaleDto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -58,5 +59,28 @@ public class AdminDashboardController {
     public ResponseEntity<Map<String, Object>> getSaleSummary() {
         Map<String, Object> summary = orderRepository.getSalesSummary();
         return ResponseEntity.ok(summary);
+    }
+
+    /** 최근 7일 일별 매출 */
+    @GetMapping("/daily-sales")
+    public List<DailySaleDto> dailySalesLast7() {
+        return service.getLast7DaysSales();
+    }
+
+    /** 인기 시설 Top5 */
+    @GetMapping("/popular-facilities")
+    public List<PopularFacilityDto> popularFacilities() {
+        return service.getPopularFacilities();
+    }
+
+    /** 인기 상품 Top5 */
+    @GetMapping("/popular-products")
+    public List<PopularProductDto> popularProducts() {
+        return service.getPopularProducts();
+    }
+
+    @GetMapping("/facility-type-stats")
+    public List<FacilityTypeStatDto> facilityTypeStats() {
+        return service.getFacilityTypeStats();
     }
 }
