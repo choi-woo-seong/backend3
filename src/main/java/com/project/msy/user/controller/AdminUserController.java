@@ -1,5 +1,6 @@
 package com.project.msy.user.controller;
 
+import com.project.msy.user.dto.UserSummaryDto;
 import com.project.msy.user.entity.User;
 import com.project.msy.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -8,27 +9,31 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/admin/users")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")  // ADMIN 권한을 가진 사용자만 호출 가능
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminUserController {
 
     private final UserService userService;
 
     /** 전체 회원 조회 */
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
+    public ResponseEntity<List<UserSummaryDto>> getAllUsers() {
         List<User> users = userService.findAllUsers();
-        return ResponseEntity.ok(users);
+        List<UserSummaryDto> result = users.stream()
+                .map(UserSummaryDto::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(result);
     }
 
     /** 특정 회원 조회 */
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+    public ResponseEntity<UserSummaryDto> getUserById(@PathVariable Long id) {
         User user = userService.findUserById(id);
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(new UserSummaryDto(user));
     }
 
     /** 특정 회원 삭제 */
