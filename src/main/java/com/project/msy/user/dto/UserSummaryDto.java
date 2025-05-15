@@ -3,6 +3,8 @@ package com.project.msy.user.dto;
 import com.project.msy.user.entity.User;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Getter
 public class UserSummaryDto {
     private Long id;
@@ -10,6 +12,7 @@ public class UserSummaryDto {
     private String name;
     private String email;
     private String phone;
+    private LocalDateTime createdAt;
     private String role;
 
     public UserSummaryDto(User user) {
@@ -18,6 +21,7 @@ public class UserSummaryDto {
         this.name = user.getName();
         this.email = user.getEmail();
         this.phone = user.getPhone();
+        this.createdAt = user.getCreatedAt();
         this.role = user.getRole().name();
     }
 }
