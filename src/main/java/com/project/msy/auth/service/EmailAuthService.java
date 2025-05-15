@@ -12,6 +12,7 @@ import java.util.Random;
 public class EmailAuthService {
 
     private final StringRedisTemplate redisTemplate;
+    private static final String RESET_PREFIX = "reset:";
 
     // 인증 코드 생성
     public String generateAndSendCode(String email) {
@@ -24,6 +25,24 @@ public class EmailAuthService {
     public boolean verifyCode(String email, String inputCode) {
         String storedCode = redisTemplate.opsForValue().get(email);
         return storedCode != null && storedCode.equals(inputCode);
+    }
+
+    // ✅ 비밀번호 재설정용 코드 저장
+    public String generateAndSendResetCode(String email) {
+        String code = createRandomCode();
+        redisTemplate.opsForValue().set(RESET_PREFIX + email, code, Duration.ofMinutes(5)); // reset용
+        return code;
+    }
+
+    // ✅ 비밀번호 재설정용 코드 검증
+    public boolean verifyResetCode(String email, String inputCode) {
+        String storedCode = redisTemplate.opsForValue().get(RESET_PREFIX + email);
+        return storedCode != null && storedCode.equals(inputCode);
+    }
+
+    // ✅ 사용한 인증코드 삭제
+    public void deleteResetCode(String email) {
+        redisTemplate.delete(RESET_PREFIX + email);
     }
 
     // 인증 코드 생성 로직 (6자리 숫자)
