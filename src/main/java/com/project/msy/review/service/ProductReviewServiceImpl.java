@@ -35,7 +35,7 @@ public class ProductReviewServiceImpl implements ProductReviewService {
 
     @Override
     public List<ProductReviewDto> getReviewsByProductId(Long productId) {
-        return reviewRepository.findByProductIdOrderByCreatedAtDesc(productId)
+        return reviewRepository.findByProductIdOrderByCreatedAtAsc(productId)
                 .stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
