@@ -18,9 +18,6 @@ public class QuestionRequest {
     @NotBlank(message = "내용을 입력해주세요")
     private String content;
 
-    // 상품 문의용
+    @NotNull(message = "상품 ID는 필수입니다") // ✅ productId는 반드시 있어야 함
     private Long productId;
-
-    // 시설 문의용
-    private Long facilityId;
 }

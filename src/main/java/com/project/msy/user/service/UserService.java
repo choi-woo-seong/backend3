@@ -42,15 +42,6 @@ public class UserService {
     }
 
     /**
-     * ID로 회원을 조회합니다.
-     */
-    public User findUserById(String id) {
-        return userRepository.findByUserId(id)
-                .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수 없습니다. id=" + id));
-    }
-
-
-    /**
      * ID로 회원을 삭제합니다.
      */
     public void deleteUserById(Long id) {
@@ -89,5 +80,4 @@ public class UserService {
     public List<UserDailySignupDto> getDailyUserGrowth() {
         return userRepository.findDailySignupsForLast30Days();
     }
-
 }

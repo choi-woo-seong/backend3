@@ -1,8 +1,7 @@
 package com.project.msy.qna.dto;
 
-import com.project.msy.qna.entity.Question;
 import lombok.Getter;
-
+import com.project.msy.qna.entity.Question;
 import java.time.LocalDateTime;
 
 /**
@@ -17,8 +16,8 @@ public class QuestionResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private AnswerResponse answer;
-    private Long productId;    // 상품 ID
-    private Long facilityId;   // 시설 ID
+    private Long productId;
+
 
     public QuestionResponse(Question q) {
         this.id = q.getId();
@@ -27,15 +26,7 @@ public class QuestionResponse {
         this.userId = q.getUser().getUserId();
         this.createdAt = q.getCreatedAt();
         this.updatedAt = q.getUpdatedAt();
-
-        // ✅ 상품 ID 또는 시설 ID 세팅
-        if (q.getProduct() != null) {
-            this.productId = q.getProduct().getId();
-        }
-        if (q.getFacility() != null) {
-            this.facilityId = q.getFacility().getId();
-        }
-
+        this.productId = q.getProduct().getId(); // ✅ 이 줄 추가!
         if (q.getAnswer() != null) {
             this.answer = new AnswerResponse(q.getAnswer());
         }

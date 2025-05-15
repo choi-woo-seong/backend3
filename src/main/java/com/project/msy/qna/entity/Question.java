@@ -1,13 +1,11 @@
 package com.project.msy.qna.entity;
 
-import com.project.msy.facility.entity.Facility;
 import com.project.msy.product.entity.Product;
 import com.project.msy.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -31,15 +29,10 @@ public class Question {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // 상품 문의용 (nullable 허용)
+    // ✅ 여기 추가됨: 질문과 상품은 다대일 관계
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = true)
+    @JoinColumn(name = "product_id", nullable = false)
     private Product product;
-
-    // 시설 문의용 (nullable 허용)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "facility_id", nullable = true)
-    private Facility facility;
 
     @OneToOne(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     private Answer answer;
@@ -50,13 +43,11 @@ public class Question {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt = LocalDateTime.now();
 
-    // 공통 생성자 (상품 또는 시설 중 하나만 설정할 수 있음)
-    public Question(String title, String content, User user, Product product, Facility facility) {
+    public Question(String title, String content, User user, Product product) {
         this.title = title;
         this.content = content;
         this.user = user;
-        this.product = product;
-        this.facility = facility;
+        this.product = product; // ✅ 생성자에서도 초기화 가능
     }
 
     @PreUpdate

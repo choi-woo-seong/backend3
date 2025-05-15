@@ -19,7 +19,6 @@ public class UserController {
         return userService.isUserIdDuplicate(userId);
     }
 
-
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody RegisterRequest request) {
         userService.signup(request);

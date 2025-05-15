@@ -1,17 +1,15 @@
 package com.project.msy.qna.service;
 
-import com.project.msy.facility.entity.Facility;
-import com.project.msy.facility.repository.FacilityRepository;
 import com.project.msy.product.entity.Product;
 import com.project.msy.product.repository.ProductRepository;
 import com.project.msy.qna.dto.AnswerResponse;
-import com.project.msy.qna.dto.QuestionRequest;
 import com.project.msy.qna.dto.QuestionResponse;
-import com.project.msy.qna.entity.Answer;
+import com.project.msy.qna.dto.QuestionRequest;
 import com.project.msy.qna.entity.Question;
+import com.project.msy.qna.entity.Answer;
 import com.project.msy.qna.exception.QuestionNotFoundException;
-import com.project.msy.qna.repository.AnswerRepository;
 import com.project.msy.qna.repository.QuestionRepository;
+import com.project.msy.qna.repository.AnswerRepository;
 import com.project.msy.user.entity.User;
 import com.project.msy.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -31,45 +29,31 @@ public class QnaServiceImpl implements QnaService {
     private final QuestionRepository questionRepo;
     private final AnswerRepository answerRepo;
     private final UserRepository userRepo;
-    private final ProductRepository productRepo;
-    private final FacilityRepository facilityRepo;
-
+    private final ProductRepository productRepo; // ✅ productRepo 주입
 
     @Override
     public QuestionResponse createQuestion(Long userId, QuestionRequest dto) {
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
-        Question q = new Question();
-        q.setUser(user);
-        q.setTitle(dto.getTitle());
-        q.setContent(dto.getContent());
+        Product product = productRepo.findById(dto.getProductId())
+                .orElseThrow(() -> new EntityNotFoundException("상품을 찾을 수 없습니다."));
 
-        if (dto.getProductId() != null) {
-            Product product = productRepo.findById(dto.getProductId())
-                    .orElseThrow(() -> new EntityNotFoundException("상품을 찾을 수 없습니다."));
-            q.setProduct(product);
-        } else if (dto.getFacilityId() != null) {
-            Facility facility = facilityRepo.findById(dto.getFacilityId())
-                    .orElseThrow(() -> new EntityNotFoundException("시설을 찾을 수 없습니다."));
-            q.setFacility(facility);
-        } else {
-            throw new IllegalArgumentException("상품 또는 시설 ID는 반드시 필요합니다.");
-        }
-
+        Question q = new Question(dto.getTitle(), dto.getContent(), user, product); // ✅ product 설정
         questionRepo.save(q);
         return new QuestionResponse(q);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<QuestionResponse> getUserQuestions(Long userId) {
         return questionRepo.findAllByUserId(userId).stream()
                 .map(QuestionResponse::new)
                 .collect(Collectors.toList());
     }
 
-
     @Override
+    @Transactional(readOnly = true)
     public QuestionResponse getQuestion(Long userId, Long questionId) {
         Question q = questionRepo.findById(questionId)
                 .orElseThrow(() -> new QuestionNotFoundException(questionId));
@@ -78,34 +62,19 @@ public class QnaServiceImpl implements QnaService {
         }
         return new QuestionResponse(q);
     }
+
     @Override
+    @Transactional(readOnly = true)
     public QuestionResponse getQuestionById(Long questionId) {
         Question q = questionRepo.findById(questionId)
                 .orElseThrow(() -> new QuestionNotFoundException(questionId));
         return new QuestionResponse(q);
     }
 
-
     @Override
     @Transactional(readOnly = true)
     public List<QuestionResponse> getAllQuestions() {
         return questionRepo.findAll().stream()
-                .map(QuestionResponse::new)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<QuestionResponse> getQuestionsByFacilityId(Long facilityId) {
-        return questionRepo.findAllByFacilityId(facilityId).stream()
-                .map(QuestionResponse::new)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<QuestionResponse> getQuestionsByProductId(Long productId) {
-        return questionRepo.findAllByProductId(productId).stream()
                 .map(QuestionResponse::new)
                 .collect(Collectors.toList());
     }

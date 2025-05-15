@@ -73,19 +73,10 @@ public class QnaController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public ResponseEntity<List<QuestionResponse>> getQuestionsByTarget(
-            @RequestParam(required = false) Long productId,
-            @RequestParam(required = false) Long facilityId
-    ) {
-        if (productId != null) {
-            return ResponseEntity.ok(service.getQuestionsByProductId(productId));
-        } else if (facilityId != null) {
-            return ResponseEntity.ok(service.getQuestionsByFacilityId(facilityId));
-        } else {
-            return ResponseEntity.ok(service.getAllQuestions());
-        }
+    public ResponseEntity<List<QuestionResponse>> getAllQuestions() {
+        List<QuestionResponse> list = service.getAllQuestions();
+        return ResponseEntity.ok(list);
     }
-
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
@@ -133,9 +124,5 @@ public class QnaController {
     public ResponseEntity<Void> deleteQuestionByAdmin(@PathVariable Long id) {
         service.deleteQuestionByAdmin(id); // 별도 메서드 또는 같은 deleteQuestion 재사용
         return ResponseEntity.noContent().build();
-    }
-    @GetMapping("/facility/{id}")
-    public ResponseEntity<List<QuestionResponse>> getFacilityQuestions(@PathVariable Long id) {
-        return ResponseEntity.ok(service.getQuestionsByFacilityId(id));
     }
 }

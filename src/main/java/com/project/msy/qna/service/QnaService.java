@@ -20,7 +20,4 @@ public interface QnaService {
     void deleteAnswer(Long questionId);
 
     void deleteQuestionByAdmin(Long id);
-    List<QuestionResponse> getQuestionsByProductId(Long productId);
-    List<QuestionResponse> getQuestionsByFacilityId(Long facilityId);
-
 }
