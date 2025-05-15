@@ -1,5 +1,6 @@
 package com.project.msy.qna.entity;
 
+import com.project.msy.facility.entity.Facility;
 import com.project.msy.product.entity.Product;
 import com.project.msy.user.entity.User;
 import jakarta.persistence.*;
@@ -33,6 +34,10 @@ public class Question {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "facility_id")
+    private Facility facility;
 
     @OneToOne(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     private Answer answer;
