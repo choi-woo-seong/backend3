@@ -22,7 +22,7 @@ public class QnaController {
 
     private final QnaService service;
 
-    // ----- User endpoints -----
+    // ===== 유저용 =====
 
     @PostMapping
     public ResponseEntity<QuestionResponse> createQuestion(
@@ -69,20 +69,18 @@ public class QnaController {
         return ResponseEntity.noContent().build();
     }
 
-    // ----- Admin endpoints -----
+    // ===== 관리자 전용 =====
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<QuestionResponse>> getAllQuestions() {
-        List<QuestionResponse> list = service.getAllQuestions();
-        return ResponseEntity.ok(list);
+        return ResponseEntity.ok(service.getAllQuestions());
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<QuestionResponse> getQuestionById(@PathVariable Long id) {
-        QuestionResponse resp = service.getQuestionById(id);
-        return ResponseEntity.ok(resp);
+        return ResponseEntity.ok(service.getQuestionById(id));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -98,8 +96,7 @@ public class QnaController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{questionId}/answer")
     public ResponseEntity<AnswerResponse> getAnswer(@PathVariable Long questionId) {
-        AnswerResponse resp = service.getAnswer(questionId);
-        return ResponseEntity.ok(resp);
+        return ResponseEntity.ok(service.getAnswer(questionId));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -108,8 +105,7 @@ public class QnaController {
             @PathVariable Long questionId,
             @Valid @RequestBody AnswerRequest dto
     ) {
-        AnswerResponse updated = service.updateAnswer(questionId, dto.getContent());
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(service.updateAnswer(questionId, dto.getContent()));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -122,7 +118,19 @@ public class QnaController {
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteQuestionByAdmin(@PathVariable Long id) {
-        service.deleteQuestionByAdmin(id); // 별도 메서드 또는 같은 deleteQuestion 재사용
+        service.deleteQuestionByAdmin(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // ===== 추가된 상품/시설별 조회 =====
+
+    @GetMapping("/product/{productId}")
+    public ResponseEntity<List<QuestionResponse>> getQuestionsByProduct(@PathVariable Long productId) {
+        return ResponseEntity.ok(service.getQuestionsByProduct(productId));
+    }
+
+    @GetMapping("/facility/{facilityId}")
+    public ResponseEntity<List<QuestionResponse>> getQuestionsByFacility(@PathVariable Long facilityId) {
+        return ResponseEntity.ok(service.getQuestionsByFacility(facilityId));
     }
 }

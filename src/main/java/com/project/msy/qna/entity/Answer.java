@@ -25,14 +25,21 @@ public class Answer {
     private Question question;
 
     @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt = LocalDateTime.now();
+    private LocalDateTime updatedAt;
 
     public Answer(String content, Question question) {
         this.content = content;
         this.question = question;
+    }
+
+    @PrePersist
+    public void prePersist() {
+        LocalDateTime now = LocalDateTime.now();
+        this.createdAt = now;
+        this.updatedAt = now;
     }
 
     @PreUpdate
@@ -40,4 +47,3 @@ public class Answer {
         this.updatedAt = LocalDateTime.now();
     }
 }
-

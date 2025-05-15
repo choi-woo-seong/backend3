@@ -1,6 +1,7 @@
 package com.project.msy.auth.controller;
 
 import com.project.msy.auth.dto.*;
+import com.project.msy.auth.security.CustomUserDetails;
 import com.project.msy.auth.service.AuthService;
 import com.project.msy.auth.service.EmailAuthService;
 import com.project.msy.auth.service.MailService;
@@ -9,6 +10,7 @@ import com.project.msy.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -36,6 +38,11 @@ public class AuthController {
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
         LoginResponse response = authService.login(request);
         return ResponseEntity.ok(response);
+    }
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> getCurrentUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        User user = userDetails.getUser();
+        return ResponseEntity.ok(new UserResponse(user));
     }
 
     @PostMapping("/forgot-password")

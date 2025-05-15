@@ -1,12 +1,11 @@
 package com.project.msy.qna.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
 /**
- * 사용자 질문 등록/수정 요청 DTO
+ * 상품 또는 시설 문의 등록용 DTO
  */
 @Getter
 @Setter
@@ -18,6 +17,6 @@ public class QuestionRequest {
     @NotBlank(message = "내용을 입력해주세요")
     private String content;
 
-    @NotNull(message = "상품 ID는 필수입니다") // ✅ productId는 반드시 있어야 함
-    private Long productId;
+    private Long productId;   // 상품 문의 시 사용
+    private Long facilityId;  // 시설 문의 시 사용
 }
