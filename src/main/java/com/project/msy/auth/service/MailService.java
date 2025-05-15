@@ -24,4 +24,15 @@ public class MailService {
         System.out.println("[메일 발송] " + to + "로 인증 코드 전송 중... 코드: " + code);
         mailSender.send(message);
     }
+
+    public void sendResetPasswordCode(String to, String code) {
+        String subject = "[모셔요] 비밀번호 재설정 인증 코드";
+        String text = String.format("비밀번호 재설정을 위한 인증 코드입니다.\n\n인증 코드: %s\n\n5분 내로 입력해주세요.", code);
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(text);
+        mailSender.send(message);
+    }
 }
