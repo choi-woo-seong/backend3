@@ -1,5 +1,7 @@
 package com.project.msy.qna.service;
 
+import com.project.msy.facility.entity.Facility;
+import com.project.msy.facility.repository.FacilityRepository;
 import com.project.msy.product.entity.Product;
 import com.project.msy.product.repository.ProductRepository;
 import com.project.msy.qna.dto.AnswerResponse;
@@ -30,6 +32,7 @@ public class QnaServiceImpl implements QnaService {
     private final AnswerRepository answerRepo;
     private final UserRepository userRepo;
     private final ProductRepository productRepo;
+    private final FacilityRepository facilityRepo; // ✅ 추가
 
     @Override
     public QuestionResponse createQuestion(Long userId, QuestionRequest dto) {
@@ -42,8 +45,13 @@ public class QnaServiceImpl implements QnaService {
                     .orElseThrow(() -> new EntityNotFoundException("상품을 찾을 수 없습니다."));
         }
 
-        Question q = new Question(dto.getTitle(), dto.getContent(), user, product);
-        q.setFacilityId(dto.getFacilityId()); // ✅ 시설 ID 설정
+        Facility facility = null;
+        if (dto.getFacilityId() != null) {
+            facility = facilityRepo.findById(dto.getFacilityId())
+                    .orElseThrow(() -> new EntityNotFoundException("시설을 찾을 수 없습니다."));
+        }
+
+        Question q = new Question(dto.getTitle(), dto.getContent(), user, product, facility);
         questionRepo.save(q);
         return new QuestionResponse(q);
     }
@@ -159,5 +167,4 @@ public class QnaServiceImpl implements QnaService {
                 .map(QuestionResponse::new)
                 .collect(Collectors.toList());
     }
-
 }
