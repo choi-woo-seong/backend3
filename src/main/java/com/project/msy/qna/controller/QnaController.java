@@ -133,4 +133,10 @@ public class QnaController {
     public ResponseEntity<List<QuestionResponse>> getQuestionsByFacility(@PathVariable Long facilityId) {
         return ResponseEntity.ok(service.getQuestionsByFacility(facilityId));
     }
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/type/{type}")
+    public ResponseEntity<List<QuestionResponse>> getQuestionsByType(@PathVariable String type) {
+        return ResponseEntity.ok(service.getQuestionsByType(type));
+    }
+
 }

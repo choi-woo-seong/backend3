@@ -23,6 +23,8 @@ public interface QnaService {
     // ✅ 시설별 질문 조회
     List<QuestionResponse> getQuestionsByFacility(Long facilityId);
 
+    List<QuestionResponse> getQuestionsByType(String type);
+
     // 답변 관련
     AnswerResponse createAnswer(Long questionId, String content);
     AnswerResponse getAnswer(Long questionId);

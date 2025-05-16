@@ -167,4 +167,23 @@ public class QnaServiceImpl implements QnaService {
                 .map(QuestionResponse::new)
                 .collect(Collectors.toList());
     }
+    @Override
+    @Transactional(readOnly = true)
+    public List<QuestionResponse> getQuestionsByType(String type) {
+        List<Question> all = questionRepo.findAll();
+
+        return all.stream()
+                .filter(q -> {
+                    if ("product".equalsIgnoreCase(type)) {
+                        return q.getProduct() != null;
+                    } else if ("facility".equalsIgnoreCase(type)) {
+                        return q.getFacility() != null;
+                    } else {
+                        return false;
+                    }
+                })
+                .map(QuestionResponse::new)
+                .collect(Collectors.toList());
+    }
+
 }
