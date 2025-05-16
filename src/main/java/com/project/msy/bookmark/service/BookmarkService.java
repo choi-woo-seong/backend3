@@ -53,5 +53,11 @@ public class BookmarkService {
                 .map(bookmark -> new BookmarkResponseDTO(bookmark.getFacility()))
                 .collect(Collectors.toList());
     }
+    //    찜 전체 삭제
+    @Transactional
+    public void removeAllBookmark(User user) {
+        bookmarkRepository.deleteAllByUser(user);
+    }
+
 
 }

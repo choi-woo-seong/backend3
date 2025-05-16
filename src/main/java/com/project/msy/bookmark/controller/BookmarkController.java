@@ -39,4 +39,11 @@ public class BookmarkController {
     public ResponseEntity<List<BookmarkResponseDTO>> getBookmarks(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(bookmarkService.getBookmarks(userDetails.getUser()));
     }
+
+    //    찜 전체 삭제
+    @DeleteMapping("/deleteAll")
+    public ResponseEntity<Void> removeAllBookmark(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        bookmarkService.removeAllBookmark(userDetails.getUser());
+        return ResponseEntity.noContent().build();
+    }
 }
