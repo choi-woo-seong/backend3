@@ -4,6 +4,7 @@ import com.project.msy.review.dto.FacilityReviewDto;
 import com.project.msy.review.service.FacilityReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,8 +22,11 @@ public class FacilityReviewController {
     }
 
     @PostMapping
-    public ResponseEntity<FacilityReviewDto> createReview(@RequestBody FacilityReviewDto dto) {
-        return ResponseEntity.ok(reviewService.createReview(dto));
+    public ResponseEntity<FacilityReviewDto> createReview(
+            @AuthenticationPrincipal(expression = "id") Long userId, // ✅ 인증된 사용자 ID
+            @RequestBody FacilityReviewDto dto
+    ) {
+        return ResponseEntity.ok(reviewService.createReview(userId, dto));
     }
 
 }

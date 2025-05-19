@@ -6,6 +6,8 @@ import com.project.msy.review.dto.FacilityReviewDto;
 import com.project.msy.review.entity.FacilityReview;
 import com.project.msy.review.repository.FacilityReviewRepository;
 import com.project.msy.review.service.FacilityReviewService;
+import com.project.msy.user.entity.User;
+import com.project.msy.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,7 @@ public class FacilityReviewServiceImpl implements FacilityReviewService {
 
     private final FacilityReviewRepository reviewRepository;
     private final FacilityRepository facilityRepository;
+    private final UserRepository userRepository; // ✅ 추가
 
     @Override
     public List<FacilityReviewDto> getReviewsByFacilityId(Long facilityId) {
@@ -36,13 +39,16 @@ public class FacilityReviewServiceImpl implements FacilityReviewService {
 
     @Override
     @Transactional
-    public FacilityReviewDto createReview(FacilityReviewDto dto) {
+    public FacilityReviewDto createReview(Long userId, FacilityReviewDto dto) {
         Facility facility = facilityRepository.findById(dto.getFacilityId())
                 .orElseThrow(() -> new IllegalArgumentException("시설이 존재하지 않습니다."));
 
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+
         FacilityReview review = FacilityReview.builder()
                 .facility(facility)
-                .userName(dto.getUserName())
+                .userName(user.getUserId()) // ✅ 로그인 사용자 ID를 저장
                 .rating(dto.getRating())
                 .content(dto.getContent())
                 .build();

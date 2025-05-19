@@ -6,5 +6,7 @@ import java.util.List;
 
 public interface FacilityReviewService {
     List<FacilityReviewDto> getReviewsByFacilityId(Long facilityId);
-    FacilityReviewDto createReview(FacilityReviewDto dto);
+
+    // ✅ 사용자 ID를 매개변수로 추가
+    FacilityReviewDto createReview(Long userId, FacilityReviewDto dto);
 }

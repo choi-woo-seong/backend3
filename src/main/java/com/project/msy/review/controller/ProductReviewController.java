@@ -5,6 +5,7 @@ import com.project.msy.review.service.ProductReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import java.util.List;
 
@@ -15,10 +16,13 @@ public class ProductReviewController {
 
     private final ProductReviewService reviewService;
 
-    // ✅ 리뷰 등록
+    // ✅ 로그인 사용자 ID를 기반으로 리뷰 등록
     @PostMapping
-    public ResponseEntity<ProductReviewDto> create(@RequestBody ProductReviewDto dto) {
-        return ResponseEntity.ok(reviewService.createReview(dto));
+    public ResponseEntity<ProductReviewDto> create(
+            @AuthenticationPrincipal(expression = "id") Long userId,
+            @RequestBody ProductReviewDto dto
+    ) {
+        return ResponseEntity.ok(reviewService.createReview(userId, dto));
     }
 
     // ✅ 상품별 리뷰 조회
