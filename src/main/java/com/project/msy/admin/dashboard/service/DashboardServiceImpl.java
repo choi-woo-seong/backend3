@@ -16,7 +16,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,32 +43,44 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Override
     public List<DailySaleDto> getLast7DaysSales() {
-        LocalDate start = LocalDate.now().minusDays(6);
-        return orderRepo.findDailyRevenueSince(start).stream()
-                .map(arr -> {
-                    // 1) 날짜 처리
-                    Object dateObj = arr[0];
-                    LocalDate localDate;
-                    if (dateObj instanceof java.sql.Date) {
-                        localDate = ((java.sql.Date) dateObj).toLocalDate();
-                    } else if (dateObj instanceof LocalDate) {
-                        localDate = (LocalDate) dateObj;
-                    } else {
-                        // 혹시 문자열로 올 경우
-                        localDate = LocalDate.parse(dateObj.toString());
-                    }
+        LocalDate today = LocalDate.now();
+        LocalDate start = today.minusDays(6);
 
-                    // 2) 금액 처리
-                    Object amtObj = arr[1];
-                    long amount = (amtObj instanceof Number)
-                            ? ((Number) amtObj).longValue()
-                            : Long.parseLong(amtObj.toString());
+        // 1) DB에서 raw data 가져오기
+        List<Object[]> raw = orderRepo.findDailyRevenueSince(start);
 
-                    // 3) DTO 생성
-                    return new DailySaleDto(localDate.toString(), amount);
-                })
-                .collect(Collectors.toList());
+        // 2) (날짜 → 매출) 맵으로 변환
+        Map<LocalDate, Long> revenueMap = raw.stream()
+                .collect(Collectors.toMap(
+                        arr -> {
+                            Object dateObj = arr[0];
+                            if (dateObj instanceof java.sql.Date) {
+                                return ((java.sql.Date) dateObj).toLocalDate();
+                            } else if (dateObj instanceof LocalDate) {
+                                return (LocalDate) dateObj;
+                            } else {
+                                return LocalDate.parse(dateObj.toString());
+                            }
+                        },
+                        arr -> {
+                            Object amtObj = arr[1];
+                            return (amtObj instanceof Number)
+                                    ? ((Number) amtObj).longValue()
+                                    : Long.parseLong(amtObj.toString());
+                        }
+                ));
+
+        // 3) 지난 7일을 돌면서, 데이터가 없으면 0원으로 채워서 DTO 생성
+        List<DailySaleDto> result = new ArrayList<>(7);
+        for (int i = 0; i < 7; i++) {
+            LocalDate date = start.plusDays(i);
+            long amount = revenueMap.getOrDefault(date, 0L);
+            result.add(new DailySaleDto(date.toString(), amount));
+        }
+
+        return result;
     }
+
 
     @Override
     public List<PopularFacilityDto> getPopularFacilities() {
