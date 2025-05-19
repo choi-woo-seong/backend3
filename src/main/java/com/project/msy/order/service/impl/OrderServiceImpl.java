@@ -32,16 +32,24 @@ public class OrderServiceImpl implements OrderService {
             int totalAmount,
             KakaoPayApproveResponse approveResponse
     ) {
-        System.out.println("[DEBUG] recordSale 호출: productId=" + productId + ", qty=" + quantity);
-
-        // User, Product 엔티티 로딩
-        User userEntity = userRepository
-                .findByUserId(userId)
+        // 1) 회원, 상품 로딩
+        User userEntity = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("해당 유저를 찾을 수 없습니다: " + userId));
 
-        Product productEntity = productRepository.getById(productId);
+        Product productEntity = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("해당 상품을 찾을 수 없습니다: " + productId));
 
-        // Order 빌더 사용
+        // 2) 재고 검증 & 차감
+        if (productEntity.getStockQuantity() < quantity) {
+            throw new IllegalArgumentException("재고가 부족합니다. 현재 재고: "
+                    + productEntity.getStockQuantity()
+                    + ", 주문 수량: " + quantity);
+        }
+        productEntity.setStockQuantity(productEntity.getStockQuantity() - quantity);
+        // 저장은 생략해도 Transactional 커밋 시점에 flush 되어 반영됩니다.
+        // productRepository.save(productEntity);
+
+        // 3) 주문 생성
         Order order = Order.builder()
                 .user(userEntity)
                 .product(productEntity)
@@ -50,6 +58,7 @@ public class OrderServiceImpl implements OrderService {
                 .status(Order.OrderStatus.결제완료)
                 .build();
 
+        // 4) 주문 저장 및 ID 리턴
         return orderRepository.save(order).getId();
     }
     @Override
