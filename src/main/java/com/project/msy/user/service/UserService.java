@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -69,8 +70,10 @@ public class UserService {
         User user = User.builder()
                 .userId(request.getUserId())
                 .email(request.getEmail())
+                .name(request.getName())
                 .phone(request.getPhone())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .createdAt(LocalDateTime.now())
                 .role(Role.USER)
                 .build();
 
