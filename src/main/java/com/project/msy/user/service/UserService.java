@@ -14,8 +14,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -81,6 +85,30 @@ public class UserService {
     }
 
     public List<UserDailySignupDto> getDailyUserGrowth() {
-        return userRepository.findDailySignupsForLast30Days();
+        LocalDate today = LocalDate.now();
+        LocalDate start = today.minusDays(29);  // 30일 전
+
+        // 1) DB에서 raw 조회 (날짜 순서 보장)
+        List<UserDailySignupDto> rawList = userRepository.findDailySignupsForLast30Days();
+
+        // 2) (날짜 → count) 맵으로 변환
+        Map<LocalDate, Long> countMap = rawList.stream()
+                .collect(Collectors.toMap(
+                        dto -> LocalDate.parse(dto.getDate()),   // "yyyy-MM-dd" 포맷
+                        UserDailySignupDto::getCount
+                ));
+
+        // 3) 전체 합계(total)는 첫 DTO에서 꺼내거나, 없으면 0
+        long total = rawList.isEmpty() ? 0L : rawList.get(0).getTotal();
+
+        // 4) 지난 30일을 순회하며 없는 날은 0으로 채워 DTO 생성
+        List<UserDailySignupDto> result = new ArrayList<>(30);
+        for (int i = 0; i < 30; i++) {
+            LocalDate date = start.plusDays(i);
+            long cnt = countMap.getOrDefault(date, 0L);
+            result.add(new UserDailySignupDto(date.toString(), cnt, total));
+        }
+
+        return result;
     }
 }
