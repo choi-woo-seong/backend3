@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,11 +30,12 @@ public class BookmarkService {
             throw new IllegalArgumentException("이미 찜한 사람입니다.");
         }
 
-        Bookmark bookmark = Bookmark.builder()
-                .user(user)
-                .facility(facility)
-                .build();
+        Bookmark bookmark = Bookmark.builder().user(user).facility(facility).build();
+        int current = Optional.ofNullable(facility.getLikeCount()).orElse(0);
+        facility.setLikeCount(current + 1);
+        facilityRepository.save(facility);
         bookmarkRepository.save(bookmark);
+
     }
 
     //    찜 취소
