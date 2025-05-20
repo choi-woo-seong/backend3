@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -85,18 +86,19 @@ public class FacilityService {
         // 주소(region) 포함 검색이 있을 때
         if (region != null && !region.isEmpty()) {
             String[] parts = region.trim().split(" ");
-            if (parts.length == 2) {
-                facilities = facilityRepository.findAll().stream()
-                        .filter(f -> f.getAddress().contains(parts[0]) && f.getAddress().contains(parts[1]))
-                        .collect(Collectors.toList());
-            } else {
-                facilities = facilityRepository.findAll().stream()
-                        .filter(f -> f.getAddress().contains(region))
-                        .collect(Collectors.toList());
-            }
+            facilities = facilityRepository.findAll().stream()
+                    .filter(f -> {
+                        String addr = f.getAddress();
+                        // parts 각각에 대해, "시/군/구/도" 접미사 제거 전·후를 모두 검사
+                        return Arrays.stream(parts).allMatch(p -> {
+                            String norm = p.replaceAll("(시|군|구|도)$", "");
+                            return addr.contains(p) || addr.contains(norm);
+                        });
+                    })
+                    .collect(Collectors.toList());
         } else {
             facilities = facilityRepository.findAll();
-       }
+        }
 
 
         // 정렬 등 추가 필터링 여기서 적용
