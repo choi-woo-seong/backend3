@@ -5,12 +5,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
     long countByStockQuantityGreaterThan(int quantity);
-
+    long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
     /**
      * 주문 테이블(o.quantity) 기준 Top5 상품
      * 반환 Object[] 배열:

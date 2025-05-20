@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,6 +25,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByOauthIdAndProvider(String oauthId, Provider provider);
 
     Optional<User> findByOauthId(String userId);
+
+    long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
 
     @Query("SELECT new com.project.msy.admin.dashboard.dto.UserGrowthDto(" +
             "CONCAT(CAST(YEAR(u.createdAt) AS string), '-', " +

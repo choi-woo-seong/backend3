@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface FacilityRepository extends JpaRepository<Facility, Long> {
@@ -49,4 +50,6 @@ public List<Facility> findByAddressContainingIgnoreCase(String region);
      */
     @Query("SELECT f.type, COUNT(f) FROM Facility f GROUP BY f.type")
     List<Object[]> countByType();
+
+    long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
 }

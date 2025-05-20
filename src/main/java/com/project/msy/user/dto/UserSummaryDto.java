@@ -12,6 +12,7 @@ public class UserSummaryDto {
     private String name;
     private String email;
     private String phone;
+    private String oauthId;
     private LocalDateTime createdAt;
     private String role;
 
@@ -21,6 +22,7 @@ public class UserSummaryDto {
         this.name = user.getName();
         this.email = user.getEmail();
         this.phone = user.getPhone();
+        this.oauthId = user.getOauthId();
         this.createdAt = user.getCreatedAt();
         this.role = user.getRole().name();
     }

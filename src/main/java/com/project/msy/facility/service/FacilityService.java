@@ -231,7 +231,8 @@ public void increaseViewCount(Long id) {
     Facility facility = facilityRepository.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("해당 시설이 존재하지 않습니다. id=" + id));
 
-    facility.setViewCount(facility.getViewCount() + 1);
+    int current = Optional.ofNullable(facility.getViewCount()).orElse(0);
+    facility.setViewCount(current + 1);
     facilityRepository.save(facility);
 }
 
