@@ -13,10 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -78,18 +75,14 @@ public class FacilityService {
                 .collect(Collectors.toList());
     }
 
-//    타입별 서비스 로직
-
     public List<FacilityResponseDTO> searchFacilities(String type, String grade, String facilitySize, String sort, String region) {
-        List<Facility> facilities = List.of();
+        List<Facility> facilities;
 
-        // 주소(region) 포함 검색이 있을 때
         if (region != null && !region.isEmpty()) {
             String[] parts = region.trim().split(" ");
             facilities = facilityRepository.findAll().stream()
                     .filter(f -> {
                         String addr = f.getAddress();
-                        // parts 각각에 대해, "시/군/구/도" 접미사 제거 전·후를 모두 검사
                         return Arrays.stream(parts).allMatch(p -> {
                             String norm = p.replaceAll("(시|군|구|도)$", "");
                             return addr.contains(p) || addr.contains(norm);
@@ -100,17 +93,15 @@ public class FacilityService {
             facilities = facilityRepository.findAll();
         }
 
-
-        // 정렬 등 추가 필터링 여기서 적용
         if (type != null) {
             facilities = facilities.stream()
                     .filter(f -> f.getType().equals(type))
                     .collect(Collectors.toList());
         }
 
-        if (grade != null) {
+        if (grade != null && !grade.equals("등급제외")) {
             facilities = facilities.stream()
-                    .filter(f -> f.getGrade() != null && f.getGrade().equals(grade))
+                    .filter(f -> f.getGrade() != null && f.getGrade().equalsIgnoreCase(grade))
                     .collect(Collectors.toList());
         }
 
@@ -122,9 +113,9 @@ public class FacilityService {
 
         if (sort != null) {
             if (sort.equals("조회순")) {
-                facilities.sort(Comparator.comparing(Facility::getViewCount).reversed());
+                facilities.sort(Comparator.comparing(Facility::getViewCount, Comparator.nullsLast(Comparator.naturalOrder())).reversed());
             } else if (sort.equals("찜많은순")) {
-                facilities.sort(Comparator.comparing(Facility::getLikeCount).reversed());
+                facilities.sort(Comparator.comparing(Facility::getLikeCount, Comparator.nullsLast(Comparator.naturalOrder())).reversed());
             }
         }
 
@@ -133,11 +124,11 @@ public class FacilityService {
                 .collect(Collectors.toList());
     }
 
-
     private FacilityResponseDTO convertToDTO(Facility facility) {
         List<String> imageUrls = facility.getFacilityImages().stream()
                 .map(FacilityImage::getImageUrl)
                 .collect(Collectors.toList());
+
         return FacilityResponseDTO.builder()
                 .id(facility.getId())
                 .name(facility.getName())
@@ -160,7 +151,6 @@ public class FacilityService {
                 .build();
     }
 
-    //    한개만 읽기
     @Transactional(readOnly = true)
     public FacilityResponseDTO getFacilityById(Long id) {
         Facility facility = facilityRepository.findById(id)
@@ -168,13 +158,11 @@ public class FacilityService {
         return convertToDTO(facility);
     }
 
-    // UPDATE
     @Transactional
     public FacilityResponseDTO updateFacility(Long id, FacilityCreateRequestDTO dto, List<MultipartFile> imageFiles) throws IOException {
         Facility facility = facilityRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 시설이 존재하지 않습니다. id=" + id));
 
-        // 기존 필드 업데이트
         facility.setType(dto.getType());
         facility.setName(dto.getName());
         facility.setEstablishedYear(dto.getEstablishedYear());
@@ -189,11 +177,9 @@ public class FacilityService {
         facility.setVisitingHours(dto.getVisitingHours());
         facility.setFacilitySize(dto.getFacilitySize());
 
-        // 기존 이미지 전부 삭제
         facilityImageRepository.deleteAll(facility.getFacilityImages());
         facility.getFacilityImages().clear();
 
-        // 새 이미지 저장
         if (imageFiles != null && !imageFiles.isEmpty()) {
             List<FacilityImage> images = imageFiles.stream()
                     .map(file -> {
@@ -216,26 +202,19 @@ public class FacilityService {
         return convertToDTO(facility);
     }
 
-    // DELETE
     @Transactional
     public void deleteFacility(Long id) {
         Facility facility = facilityRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 시설이 존재하지 않습니다. id=" + id));
-
         facilityRepository.delete(facility);
     }
 
-//    viewCount +1
-@Transactional
-public void increaseViewCount(Long id) {
-    Facility facility = facilityRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("해당 시설이 존재하지 않습니다. id=" + id));
-
-    int current = Optional.ofNullable(facility.getViewCount()).orElse(0);
-    facility.setViewCount(current + 1);
-    facilityRepository.save(facility);
-}
-
-
-
+    @Transactional
+    public void increaseViewCount(Long id) {
+        Facility facility = facilityRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 시설이 존재하지 않습니다. id=" + id));
+        int current = Optional.ofNullable(facility.getViewCount()).orElse(0);
+        facility.setViewCount(current + 1);
+        facilityRepository.save(facility);
+    }
 }
