@@ -112,12 +112,19 @@ public class FacilityService {
         }
 
         if (sort != null) {
-            if (sort.equals("조회순")) {
-                facilities.sort(Comparator.comparing(Facility::getViewCount, Comparator.nullsLast(Comparator.naturalOrder())).reversed());
-            } else if (sort.equals("찜많은순")) {
-                facilities.sort(Comparator.comparing(Facility::getLikeCount, Comparator.nullsLast(Comparator.naturalOrder())).reversed());
+
+            switch (sort) {
+                case "view":
+                    facilities.sort(Comparator.comparing(Facility::getViewCount, Comparator.nullsLast(Comparator.naturalOrder())).reversed());
+                    break;
+                case "like":
+                    facilities.sort(Comparator.comparing(Facility::getLikeCount, Comparator.nullsLast(Comparator.naturalOrder())).reversed());
+                    break;
+                default:
+                    break;
             }
         }
+
 
         return facilities.stream()
                 .map(this::convertToDTO)

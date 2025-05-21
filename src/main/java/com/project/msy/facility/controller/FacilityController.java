@@ -65,11 +65,11 @@ public class FacilityController {
             @RequestParam(required = false) String sort,
             @RequestParam(required = false) String region
     ) {
-        // 🔁 한글 정렬 키워드 → 내부 코드로 매핑
-        String mappedSort = sortMap.getOrDefault(sort, null);
-        List<FacilityResponseDTO> result = facilityService.searchFacilities(type, grade, facilitySize, mappedSort, region);
+
+        List<FacilityResponseDTO> result = facilityService.searchFacilities(type, grade, facilitySize, sort, region);
         return ResponseEntity.ok(result);
     }
+
 
     // UPDATE
     @PutMapping(value = "/facility/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
