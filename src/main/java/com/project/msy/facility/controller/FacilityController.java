@@ -13,6 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -21,7 +23,13 @@ public class FacilityController {
 
     private final FacilityService facilityService;
 
-    //    admin create
+    private static final Map<String, String> sortMap = Map.of(
+            "찜순", "like",
+            "리뷰순", "review",
+            "조회순", "view"
+    );
+
+    // admin create
     @PostMapping(value = "/facility/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Facility> createFacility(
             @RequestPart("dto") FacilityCreateRequestDTO dto,
@@ -31,7 +39,7 @@ public class FacilityController {
         return ResponseEntity.ok(created);
     }
 
-    //    admin read
+    // admin read
     @GetMapping("/facility")
     public ResponseEntity<List<FacilityResponseDTO>> getFacilities(@RequestParam(required = false) String type) {
         if (type != null) {
@@ -41,26 +49,27 @@ public class FacilityController {
         }
     }
 
-    //    admin facility 한개만 read
+    // admin facility 한개만 read
     @GetMapping("/facility/{id}")
     public ResponseEntity<FacilityResponseDTO> getFacility(@PathVariable Long id) {
         FacilityResponseDTO dto = facilityService.getFacilityById(id);
         return ResponseEntity.ok(dto);
     }
 
-    //    태그별 list조회
+    // 태그별 list조회
     @GetMapping("/facility/search")
     public ResponseEntity<List<FacilityResponseDTO>> searchFacilities(
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String grade,
             @RequestParam(required = false) String facilitySize,
             @RequestParam(required = false) String sort,
-            @RequestParam(required = false) String region // 🔥 추가
+            @RequestParam(required = false) String region
     ) {
-        List<FacilityResponseDTO> result = facilityService.searchFacilities(type, grade, facilitySize, sort, region);
+        // 🔁 한글 정렬 키워드 → 내부 코드로 매핑
+        String mappedSort = sortMap.getOrDefault(sort, null);
+        List<FacilityResponseDTO> result = facilityService.searchFacilities(type, grade, facilitySize, mappedSort, region);
         return ResponseEntity.ok(result);
     }
-
 
     // UPDATE
     @PutMapping(value = "/facility/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -80,12 +89,11 @@ public class FacilityController {
         return ResponseEntity.noContent().build();
     }
 
-    //    viewCount +1 하기
+    // viewCount +1 하기
     @PostMapping("/facility/{id}/view")
     public ResponseEntity<Void> increaseViewCount(@PathVariable Long id) {
         log.info("🔥 viewCount 올라갑니다 id: {}", id);
         facilityService.increaseViewCount(id);
         return ResponseEntity.ok().build();
     }
-
 }
