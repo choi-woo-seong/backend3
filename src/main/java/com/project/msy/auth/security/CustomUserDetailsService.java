@@ -27,6 +27,11 @@ public class CustomUserDetailsService implements UserDetailsService {
             lookup = userId.substring("KAKAO_".length());
         }
 
+        if (userId.startsWith("GOOGLE_GOOGLE_")) {
+            // 첫 번째 "GOOGLE_" 제거
+            lookup = userId.substring("GOOGLE_".length());
+        }
+
         // 1) userId 로 먼저 찾아보고
         Optional<User> userOpt = userRepository.findByUserId(lookup);
         // 2) 못 찾으면 oauthId 로 다시 시도
